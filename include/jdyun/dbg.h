@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 작성자: 윤정도
  */
 
@@ -10,6 +10,10 @@
 #include <sstream>
 #include <mutex>
 
+#ifdef __GNUC__ 
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
 class dbg {
   public:
@@ -25,3 +29,7 @@ class dbg {
 #endif
     }
 };
+
+#ifdef __GNUC__ 
+  #pragma GCC diagnostic pop
+#endif

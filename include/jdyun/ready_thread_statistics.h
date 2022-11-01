@@ -1,8 +1,10 @@
-﻿/*
+/*
  * 작성자: 윤정도
  */
 
 #pragma once
+
+#include <atomic>
 
 enum class time_precision
 {
@@ -46,8 +48,8 @@ struct ready_thread_statistics
   {
     switch (precision)
     {
-    case time_precision::miliseconds: return average_execution_time / 1000;
-    case time_precision::seconds: return average_execution_time / 1000000;
+    case time_precision::miliseconds: return average_execution_time / 1'000;
+    case time_precision::seconds: return average_execution_time / 1'000'000;
     case time_precision::microseconds: return average_execution_time;
     }
     return -1;

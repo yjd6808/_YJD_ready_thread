@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 작성자: 윤정도
  */
 
@@ -7,53 +7,27 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <semaphore>
 #include <utility>
 #include <functional>
 #include <cassert>
+
+#include "latch.h"
+#include "semaphore.h"
 #include "ready_thread_statistics.h"
 
 class ready_thread_collection_abstract
 {
-
-  // ===========================================================================
-  //             P U B L I C
-  // ===========================================================================
-public:
-  double total_execution_time(const time_precision precision)
-  {
-    std::unique_lock ul(m_statistics_lock);
-    return m_statistics.get_total_execution_time(precision);
-  }
-
-  double average_execution_time(const time_precision precision)
-  {
-    std::unique_lock ul(m_statistics_lock);
-    return m_statistics.get_average_execution_time(precision);
-  }
-
-  double last_execution_time(const time_precision precision)
-  {
-    std::unique_lock ul(m_statistics_lock);
-    return m_statistics.get_last_execution_time(precision);
-  }
-
-  int launch_count() const
-  {
-    return m_statistics.get_launch_count();
-  }
-
-  void reset_statistics()
-  {
-    std::unique_lock ul(m_statistics_lock);
-    m_statistics.reset();
-  }
-
   // ===========================================================================
   //             P R O T E C T E D
   // ===========================================================================
 protected:
-  ready_thread_collection_abstract() {}
-  virtual ~ready_thread_collection_abstract() {}
+  ready_thread_collection_abstract(int size) :
+    m_start_wait_fm(size, 0),
+    m_end_wait_fm(size, 0)
+  {
+  }
+  virtual ~ready_thread_collection_abstract() {};
 
   void update_statistics(double elpased_time)
   {
@@ -61,33 +35,22 @@ protected:
     m_statistics.update(elpased_time);
   }
 
-  void notify_ready(std::mutex& child_lock)
+  void notify_ready()
   {
-    child_lock.unlock();
-    m_thread_ready_signal_lock.lock();
-    m_thread_ready_signal.notify_one();
-    m_thread_ready_signal_lock.unlock();
-    child_lock.lock();
+    m_start_wait_fm.signal();
   }
 
-  void notify_end(std::mutex& child_lock)
+  void notify_end()
   {
-    child_lock.unlock();
-    m_thread_end_signal_lock.lock();
-    m_thread_end_signal.notify_one();
-    m_thread_end_signal_lock.unlock();
-    child_lock.lock();
+    m_end_wait_fm.signal();
   }
 
   // ===========================================================================
   //             P R O T E C T E D
   // ===========================================================================
 protected:
-  std::condition_variable m_thread_ready_signal;    
-  std::mutex m_thread_ready_signal_lock;
-
-  std::condition_variable m_thread_end_signal;      
-  std::mutex m_thread_end_signal_lock;
+  latch m_start_wait_fm;
+  latch m_end_wait_fm;
 
   ready_thread_statistics m_statistics;
   std::mutex m_statistics_lock;

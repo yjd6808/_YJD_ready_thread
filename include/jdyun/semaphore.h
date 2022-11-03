@@ -63,6 +63,6 @@ public:
 private:
   std::mutex m_lock;
   std::condition_variable m_condvar;
-  int m_usable_count;     // 접근가능한 쓰레드 수
   int m_max_count;
+  int m_usable_count;     // 접근가능한 쓰레드 수
 };

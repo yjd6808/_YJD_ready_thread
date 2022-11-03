@@ -78,8 +78,8 @@ private:
   explicit ready_thread(ready_thread_collection_abstract* parent) :
     m_running(true),
     m_terminated(false),
-    m_wait_sem(1, 0),
     m_running_state(running_state::start_wait),
+    m_wait_sem(1, 0),
     m_parent(parent),
     m_thread([this] { worker(); })
   {
@@ -164,14 +164,14 @@ private:
   bool m_running;
   bool m_terminated;
   running_state m_running_state;
-
+  semaphore m_wait_sem;
   ready_thread_collection_abstract* m_parent;
   ready_thread_statistics m_statistics;
   std::mutex m_statistics_lock;
 
   std::thread m_thread;
   std::mutex m_lock;
-  semaphore m_wait_sem;
+  
   std::function<void()> m_action;
 
   friend class ready_thread_collection;
